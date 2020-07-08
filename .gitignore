@@ -1,5 +1,6 @@
 # Java
 target
+out
 
 # IntelliJ files
 *.iml
