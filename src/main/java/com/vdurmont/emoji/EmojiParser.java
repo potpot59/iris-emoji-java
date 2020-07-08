@@ -170,8 +170,6 @@ public class EmojiParser {
 				int radix = input.charAt(codePointStart + 2) == 'x' ? 16 : 10;
 				int codePoint = Integer.parseInt(input.substring(codePointStart + 2 + radix / 16, codePointEnd), radix);
 				charsIndex += Character.toChars(codePoint, chars, charsIndex);
-			} catch (NumberFormatException e) {
-				break;
 			} catch (IllegalArgumentException e) {
 				break;
 			}
@@ -228,15 +226,11 @@ public class EmojiParser {
 	) {
 		EmojiTransformer emojiTransformer = new EmojiTransformer() {
 			public String transform(EmojiResult unicodeCandidate) {
-				switch (fitzpatrickAction) {
-					default:
-					case PARSE:
-					case REMOVE:
-						return unicodeCandidate.getEmoji().getHtmlDecimal();
-					case IGNORE:
-						return unicodeCandidate.getEmoji().getHtmlDecimal() +
-								unicodeCandidate.getFitzpatrickUnicode();
-				}
+				return switch (fitzpatrickAction) {
+					case PARSE, REMOVE -> unicodeCandidate.getEmoji().getHtmlDecimal();
+					case IGNORE -> unicodeCandidate.getEmoji().getHtmlDecimal() +
+							unicodeCandidate.getFitzpatrickUnicode();
+				};
 			}
 		};
 
@@ -281,15 +275,11 @@ public class EmojiParser {
 	) {
 		EmojiTransformer emojiTransformer = new EmojiTransformer() {
 			public String transform(EmojiResult unicodeCandidate) {
-				switch (fitzpatrickAction) {
-					default:
-					case PARSE:
-					case REMOVE:
-						return unicodeCandidate.getEmoji().getHtmlHexadecimal();
-					case IGNORE:
-						return unicodeCandidate.getEmoji().getHtmlHexadecimal() +
-								unicodeCandidate.getFitzpatrickUnicode();
-				}
+				return switch (fitzpatrickAction) {
+					case PARSE, REMOVE -> unicodeCandidate.getEmoji().getHtmlHexadecimal();
+					case IGNORE -> unicodeCandidate.getEmoji().getHtmlHexadecimal() +
+							unicodeCandidate.getFitzpatrickUnicode();
+				};
 			}
 		};
 
@@ -390,7 +380,7 @@ public class EmojiParser {
 
 	public static List<String> extractEmojiStrings(String input, int limit) {
 		var items = extractEmojis(input, limit);
-		List<String> result = new ArrayList<String>(items.size());
+		List<String> result = new ArrayList<>(items.size());
 		for (EmojiResult i : items) {
 			result.add(i.toString());
 		}
@@ -420,7 +410,7 @@ public class EmojiParser {
 		char[] inputCharArray = input.toCharArray();
 		List<EmojiResult> candidates = new ArrayList<>();
 		EmojiResult next;
-		for (int i = 0; (next = genNextEmoji(inputCharArray, i)) != null; i = next.endIndex) {
+		for (int i = 0; (next = getNextEmoji(inputCharArray, i)) != null; i = next.endIndex) {
 			candidates.add(next);
 			if (limit != 0) {
 				limit--;
@@ -443,35 +433,42 @@ public class EmojiParser {
 	 * @param start starting index for search
 	 * @return the next UnicodeCandidate or null if no UnicodeCandidate is found after start index
 	 */
-	public static EmojiResult genNextEmoji(char[] chars, int start) {
+	public static EmojiResult getNextEmoji(char[] chars, int start) {
 		for (int i = start; i < chars.length; i++) {
-			var emoji = getNextEmoji(chars, i);
-			if (emoji != null) {
-				Fitzpatrick fitzpatrick = null;
-				Gender gender = null;
-				var endPos = i + emoji.unicode.length();
-				if (emoji.supportsFitzpatrick) {
-					fitzpatrick = Fitzpatrick.find(chars, endPos);
-					if (fitzpatrick != null) {
-						endPos += 2;
-					}
-					GenderMatch gg = findGender(chars, endPos);
-					if (gg != null) {
-						endPos = gg.endPos + 1;
-						gender = gg.gender;
-					}
-				}
-
-				if (chars.length > endPos) {
-					var ch = chars[endPos];
-					if (ch == '\uFE0F')
-						endPos++;
-				}
-				return new EmojiResult(emoji, fitzpatrick, gender, chars, i, endPos);
-			}
+			var emoji = getEmojiInPosition(chars, i);
+			if (emoji != null)
+				return emoji;
 		}
 
 		return null;
+	}
+
+	public static EmojiResult getEmojiInPosition(char[] chars, int start) {
+		var emoji = getBestBaseEmoji(chars, start);
+		if (emoji == null)
+			return null;
+
+		Fitzpatrick fitzpatrick = null;
+		Gender gender = null;
+		var endPos = start + emoji.unicode.length();
+		if (emoji.supportsFitzpatrick) {
+			fitzpatrick = Fitzpatrick.find(chars, endPos);
+			if (fitzpatrick != null) {
+				endPos += 2;
+			}
+			GenderMatch gg = findGender(chars, endPos);
+			if (gg != null) {
+				endPos = gg.endPos + 1;
+				gender = gg.gender;
+			}
+		}
+
+		if (chars.length > endPos) {
+			var ch = chars[endPos];
+			if (ch == '\uFE0F')
+				endPos++;
+		}
+		return new EmojiResult(emoji, fitzpatrick, gender, chars, start, endPos);
 	}
 
 	private static GenderMatch findGender(char[] chars, int startPos) {
@@ -513,7 +510,7 @@ public class EmojiParser {
 	 * @return the end index of the unicode emoji starting at startPos. -1 if not
 	 * found
 	 */
-	protected static Emoji getNextEmoji(char[] text, int startPos) {
+	public static Emoji getBestBaseEmoji(char[] text, int startPos) {
 		return EmojiManager.EMOJI_TRIE.getBestEmoji(text, startPos);
 	}
 
@@ -629,9 +626,11 @@ public class EmojiParser {
 		String transform(EmojiResult unicodeCandidate);
 	}
 
-	/*public static void main(String[] args) {
-		var text = "\uD83D\uDC68\u200D\uD83D\uDCBB\uD83E\uDDB9\uD83C\uDFFE\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83D\uDD2C\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC70\uD83C\uDFFE\uD83E\uDDDB\uD83C\uDFFD\u200D♂️\uD83E\uDD31\uD83C\uDFFF\uD83D\uDC68\uD83C\uDFFC\u200D\uD83C\uDFEB\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC73\uD83C\uDFFB\u200D♂️";
+	public static void main(String[] args) {
+		/*var text = "\uD83D\uDC68\u200D\uD83D\uDCBB\uD83E\uDDB9\uD83C\uDFFE\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83D\uDD2C\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC70\uD83C\uDFFE\uD83E\uDDDB\uD83C\uDFFD\u200D♂️\uD83E\uDD31\uD83C\uDFFF\uD83D\uDC68\uD83C\uDFFC\u200D\uD83C\uDFEB\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC73\uD83C\uDFFB\u200D♂️";
 		var items = EmojiParser.extractEmojiStrings(text);
-		System.out.println(items);
-	}*/
+		System.out.println(items);*/
+		var res = EmojiManager.isEmoji("\uD83E\uDDDB\uD83C\uDFFD\u200D♂️ ");
+		System.out.println(res);
+	}
 }

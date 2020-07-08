@@ -95,7 +95,10 @@ public class EmojiManager {
 		if (unicode == null) {
 			return null;
 		}
-		return EMOJI_TRIE.getEmoji(unicode);
+		var res = EmojiParser.getEmojiInPosition(unicode.toCharArray(), 0);
+		if (res == null)
+			return null;
+		return res.emoji;
 	}
 
 	/**
@@ -115,11 +118,9 @@ public class EmojiManager {
 	 */
 	public static boolean isEmoji(String string) {
 		if (string == null) return false;
-
-		EmojiParser.EmojiResult unicodeCandidate = EmojiParser.genNextEmoji(string.toCharArray(), 0);
-		return unicodeCandidate != null &&
-				unicodeCandidate.startIndex == 0 &&
-				unicodeCandidate.endIndex == string.length();
+		var chars = string.toCharArray();
+		EmojiParser.EmojiResult result = EmojiParser.getEmojiInPosition(chars, 0);
+		return result != null && result.startIndex == 0 && result.endIndex == chars.length;
 	}
 
 	/**
@@ -130,7 +131,7 @@ public class EmojiManager {
 	 */
 	public static boolean containsEmoji(String string) {
 		if (string == null) return false;
-		return EmojiParser.genNextEmoji(string.toCharArray(), 0) != null;
+		return EmojiParser.getNextEmoji(string.toCharArray(), 0) != null;
 	}
 
 	/**

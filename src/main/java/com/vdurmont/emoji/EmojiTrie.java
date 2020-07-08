@@ -77,14 +77,10 @@ public class EmojiTrie {
 			throw new ArrayIndexOutOfBoundsException("start " + start + ", length " + sequence.length);}
 		var end = sequence.length;
 		Node tree = root;
-		//Node prev = null;
 		for (int i = start; i < end; i++) {
 			if (!tree.hasChild(sequence[i])) {
-				/*if (prev == null)
-					return null;*/
 				return tree.isEndOfEmoji()? tree.emoji : null;
 			}
-			//prev = tree;
 			tree = tree.getChild(sequence[i]);
 		}
 
@@ -130,7 +126,7 @@ public class EmojiTrie {
 	}
 
 	private static class Node {
-		private final Map<Character, Node> children = new HashMap<Character, Node>();
+		private final Map<Character, Node> children = new HashMap<>();
 		private Emoji emoji;
 
 		private void setEmoji(Emoji emoji) {
