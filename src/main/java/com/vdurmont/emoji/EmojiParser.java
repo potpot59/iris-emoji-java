@@ -46,10 +46,7 @@ public class EmojiParser {
 	 * @param fitzpatrickAction the action to apply for the fitzpatrick modifiers
 	 * @return the string with the emojis replaced by their alias.
 	 */
-	public static String parseToAliases(
-			String input,
-			final FitzpatrickAction fitzpatrickAction
-	) {
+	public static String parseToAliases(String input, final FitzpatrickAction fitzpatrickAction) {
 		EmojiTransformer emojiTransformer = new EmojiTransformer() {
 			public String transform(EmojiResult unicodeCandidate) {
 				switch (fitzpatrickAction) {
@@ -373,18 +370,15 @@ public class EmojiParser {
 	 * @param transformer emoji transformer to apply to each emoji
 	 * @return input string with all emojis transformed
 	 */
-	public static String parseFromUnicode(
-			String input,
-			EmojiTransformer transformer
-	) {
+	public static String parseFromUnicode(String input, EmojiTransformer transformer) {
 		int prev = 0;
 		StringBuilder sb = new StringBuilder(input.length());
 		List<EmojiResult> replacements = getEmojies(input);
 		for (EmojiResult candidate : replacements) {
-			sb.append(input, prev, candidate.getEmojiStartIndex());
+			sb.append(input, prev, candidate.startIndex);
 
 			sb.append(transformer.transform(candidate));
-			prev = candidate.getFitzpatrickEndIndex();
+			prev = candidate.endIndex;
 		}
 
 		return sb.append(input.substring(prev)).toString();
@@ -635,9 +629,9 @@ public class EmojiParser {
 		String transform(EmojiResult unicodeCandidate);
 	}
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		var text = "\uD83D\uDC68\u200D\uD83D\uDCBB\uD83E\uDDB9\uD83C\uDFFE\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83D\uDD2C\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC70\uD83C\uDFFE\uD83E\uDDDB\uD83C\uDFFD\u200D♂️\uD83E\uDD31\uD83C\uDFFF\uD83D\uDC68\uD83C\uDFFC\u200D\uD83C\uDFEB\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC73\uD83C\uDFFB\u200D♂️";
 		var items = EmojiParser.extractEmojiStrings(text);
 		System.out.println(items);
-	}
+	}*/
 }

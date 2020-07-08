@@ -1,36 +1,16 @@
 # emoji-java
 
-[![Build Status](https://travis-ci.org/vdurmont/emoji-java.svg?branch=master)](https://travis-ci.org/vdurmont/emoji-java)
-[![Coverage Status](https://img.shields.io/coveralls/vdurmont/emoji-java.svg)](https://coveralls.io/r/vdurmont/emoji-java?branch=master)
 [![License Info](http://img.shields.io/badge/license-The%20MIT%20License-brightgreen.svg)](https://github.com/vdurmont/emoji-java/blob/master/LICENSE.md)
 
 _The missing emoji library for java._
 
-**emoji-java** is a lightweight java library that helps you use Emojis in your java applications.
+**iris:emoji-java** is a lightweight java library that helps you use Emojis in your java applications.
 
 ## How to get it?
 
-##### Via Maven:
-
-```xml
-<dependency>
-  <groupId>com.vdurmont</groupId>
-  <artifactId>emoji-java</artifactId>
-  <version>5.1.1</version>
-</dependency>
-```
-
-You can also download the project, build it with `mvn clean install` and add the generated jar to your buildpath.
-
-##### Via Gradle:
-
-```gradle
-compile 'com.vdurmont:emoji-java:5.1.1'
-```
-
 ##### Via Direct Download:
 
-- Use [releases](https://github.com/vdurmont/emoji-java/releases) tab to download the jar directly.
+- Use [releases](https://github.com/iris2iris/emoji-java/releases) tab to download the jar directly.
 - Download JSON-java dependency from http://mvnrepository.com/artifact/org.json/json.
 
 ## How to use it?
@@ -202,7 +182,8 @@ You can search a string of mixed emoji/non-emoji characters and have all of the 
 
 ## Credits
 
-**emoji-java** originally used the data provided by the [github/gemoji project](https://github.com/github/gemoji). It is still based on it but has evolved since.
+**iris-emoji-java** is based on [github/vdurmont/emoji-java](https://github.com/vdurmont/emoji-java).
+And in its turn **emoji-java** originally used the data provided by the [github/gemoji project](https://github.com/github/gemoji). It is still based on it but has evolved since.
 
 ## Available Emojis
 
