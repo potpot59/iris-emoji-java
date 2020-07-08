@@ -12,10 +12,8 @@ import java.util.*;
  */
 public class EmojiManager {
 	private static final String PATH = "/emojis.json";
-	private static final Map<String, Emoji> EMOJIS_BY_ALIAS =
-			new HashMap<String, Emoji>();
-	private static final Map<String, Set<Emoji>> EMOJIS_BY_TAG =
-			new HashMap<String, Set<Emoji>>();
+	private static final Map<String, Emoji> EMOJIS_BY_ALIAS = new HashMap<>();
+	private static final Map<String, Set<Emoji>> EMOJIS_BY_TAG = new HashMap<>();
 	private static final List<Emoji> ALL_EMOJIS;
 	static final EmojiTrie EMOJI_TRIE;
 
@@ -26,10 +24,8 @@ public class EmojiManager {
 			ALL_EMOJIS = emojis;
 			for (Emoji emoji : emojis) {
 				for (String tag : emoji.getTags()) {
-					if (EMOJIS_BY_TAG.get(tag) == null) {
-						EMOJIS_BY_TAG.put(tag, new HashSet<>());
-					}
-					EMOJIS_BY_TAG.get(tag).add(emoji);
+					var tagSet = EMOJIS_BY_TAG.computeIfAbsent(tag, k -> new HashSet<>());
+					tagSet.add(emoji);
 				}
 				for (String alias : emoji.getAliases()) {
 					EMOJIS_BY_ALIAS.put(alias, emoji);
@@ -37,11 +33,7 @@ public class EmojiManager {
 			}
 
 			EMOJI_TRIE = new EmojiTrie(emojis);
-			Collections.sort(ALL_EMOJIS, new Comparator<Emoji>() {
-				public int compare(Emoji e1, Emoji e2) {
-					return e2.getUnicode().length() - e1.getUnicode().length();
-				}
-			});
+			ALL_EMOJIS.sort((e1, e2) -> e2.getUnicode().length() - e1.getUnicode().length());
 			stream.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -126,8 +118,8 @@ public class EmojiManager {
 
 		EmojiParser.EmojiResult unicodeCandidate = EmojiParser.genNextEmoji(string.toCharArray(), 0);
 		return unicodeCandidate != null &&
-				unicodeCandidate.getEmojiStartIndex() == 0 &&
-				unicodeCandidate.getFitzpatrickEndIndex() == string.length();
+				unicodeCandidate.startIndex == 0 &&
+				unicodeCandidate.endIndex == string.length();
 	}
 
 	/**
@@ -138,7 +130,6 @@ public class EmojiManager {
 	 */
 	public static boolean containsEmoji(String string) {
 		if (string == null) return false;
-
 		return EmojiParser.genNextEmoji(string.toCharArray(), 0) != null;
 	}
 
