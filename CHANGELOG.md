@@ -5,7 +5,7 @@
 - Ivan Ivanov forked main repository
 - Added class `Gender`
 - Added understanding of complex emojies: `{basic_emoji}{skin_color}?{gender}?`
-- Added support of bugged VK.COM web-version emojies, where there is no `\uFE0F` ending char
+- Added support of bugged VK.COM web-version emojis, where ending char `\uFE0F` is absent
 - `EmojiParser.UnicodeCandidate` renamed to `EmojiParser.EmojiResult`. And added new fields
 - `EmojiParser` algorithm improvement. `getEmojiEndPos` is replaced with `getNextEmoji`<br>
 - `EmojiTrie.getBestEmoji` introduced to replace slow `EmojiTrie.getEmojiEndPos` method
