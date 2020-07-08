@@ -9,9 +9,7 @@ import org.junit.runners.JUnit4;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class EmojiParserTest {
@@ -55,7 +53,7 @@ public class EmojiParserTest {
     String result = EmojiParser.parseToAliases(str);
 
     // THEN
-    assertEquals(":boy|type_6:", result);
+    assertEquals(":boy|TYPE_6:", result);
   }
 
   @Test
@@ -507,7 +505,7 @@ public class EmojiParserTest {
     String str = "An 😀awesome 😃string with a few 😉emojis!";
 
     // WHEN
-    List<String> result = EmojiParser.extractEmojis(str);
+    List<String> result = EmojiParser.extractEmojiStrings(str);
 
     // THEN
     assertEquals("😀", result.get(0));
@@ -527,7 +525,7 @@ public class EmojiParserTest {
     final String surfers = surfer + " " + surfer3 + " " + surfer4 + " " + surfer5 + " " + surfer6;
 
     // WHEN
-    List<String> result = EmojiParser.extractEmojis(surfers);
+    List<String> result = EmojiParser.extractEmojiStrings(surfers);
 
     // THEN
     assertEquals(5, result.size());

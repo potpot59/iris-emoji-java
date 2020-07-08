@@ -9,7 +9,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -67,7 +70,7 @@ public class EmojiJsonTest {
 
         if (shouldContainFitzpatric) {
             EmojiParser.parseFromUnicode(emoji, new EmojiParser.EmojiTransformer() {
-                public String transform(EmojiParser.UnicodeCandidate unicodeCandidate) {
+                public String transform(EmojiParser.EmojiResult unicodeCandidate) {
                     if (unicodeCandidate.hasFitzpatrick()) {
                         assertTrue("Asserting emoji contains fitzpatric: " + emoji + " " + unicodeCandidate.getEmoji(),
                                 unicodeCandidate.getEmoji().supportsFitzpatrick());

@@ -1,5 +1,17 @@
 # Changelog
 
+## v6.0i
+
+- Ivan Ivanov forked main repository
+- Added class `Gender`
+- Added understanding of complex emojies: `{basic_emoji}{skin_color}?{gender}?`
+- Added support of bugged VK.COM web-version emojies, where there is no `\uFE0F` ending char
+- `EmojiParser.UnicodeCandidate` renamed to `EmojiParser.EmojiResult`. And added new fields
+- `EmojiParser` algorithm improvement. `getEmojiEndPos` is replaced with `getNextEmoji`<br>
+- `EmojiTrie.getBestEmoji` introduced to replace slow `EmojiTrie.getEmojiEndPos` method
+- Memory usage fixes by optimizing generation of new String objects.
+- As a result speed improvement reaches up to 5x times comparing to v.5.1.1
+
 ## v5.1.1
 
 - Bugfix: respect fitzpatrick modifier when extracting emojis (thanks @sullis)

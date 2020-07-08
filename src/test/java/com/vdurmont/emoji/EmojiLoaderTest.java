@@ -10,20 +10,17 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class EmojiLoaderTest {
   @Test
   public void load_empty_database_returns_empty_list() throws IOException {
     // GIVEN
-    byte[] bytes = new JSONArray().toString().getBytes("UTF-8");
+    byte[] bytes = new JSONArray().toString().getBytes(StandardCharsets.UTF_8);
     InputStream stream = new ByteArrayInputStream(bytes);
 
     // WHEN
