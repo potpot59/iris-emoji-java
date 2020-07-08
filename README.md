@@ -183,6 +183,7 @@ You can search a string of mixed emoji/non-emoji characters and have all of the 
 ## Credits
 
 **iris-emoji-java** is based on [github/vdurmont/emoji-java](https://github.com/vdurmont/emoji-java).
+
 And in its turn **emoji-java** originally used the data provided by the [github/gemoji project](https://github.com/github/gemoji). It is still based on it but has evolved since.
 
 ## Available Emojis
