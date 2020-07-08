@@ -4,7 +4,7 @@
 
 _The missing emoji library for java._
 
-**[iris:emoji-java](https://github.com/iris2iris/emoji-java)** is a lightweight java library that helps you use Emojis in your java applications.
+**[iris:emoji-java](https://github.com/iris2iris/iris-emoji-java)** is a lightweight java library that helps you use Emojis in your java applications.
 
 It was forked from **[emoji-java](https://github.com/vdurmont/emoji-java)**
 
@@ -20,7 +20,7 @@ And of course, extend useful methods.
 
 ##### Via Direct Download:
 
-- Use [releases](https://github.com/iris2iris/emoji-java/releases) tab to download the jar directly.
+- Use [releases](https://github.com/iris2iris/iris-emoji-java/releases) tab to download the jar directly.
 - Download JSON-java dependency from http://mvnrepository.com/artifact/org.json/json.
 
 ## How to use it?
