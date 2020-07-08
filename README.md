@@ -6,6 +6,12 @@ _The missing emoji library for java._
 
 **iris:emoji-java** is a lightweight java library that helps you use Emojis in your java applications.
 
+It was forked from **[emoji-java](https://github.com/vdurmont/emoji-java)**
+
+```❗️ The most important reason I forked it was I have found how to improve its speed up to 5x times!```
+
+And of course, extend useful methods.  
+
 ## How to get it?
 
 ##### Via Direct Download:
