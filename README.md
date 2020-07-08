@@ -8,7 +8,7 @@ _The missing emoji library for java._
 
 It was forked from **[emoji-java](https://github.com/vdurmont/emoji-java)**
 
-```❗️ The most important reason I forked it was I have found how to improve its speed up to 5x times!```
+❗️ The most important reason I forked it was I have found how to improve its __speed up to 5x__ times!
 
 And of course, extend useful methods.  
 
