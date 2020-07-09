@@ -11,7 +11,7 @@ It was forked from **[emoji-java](https://github.com/vdurmont/emoji-java)**
 #### Reasons I forked it:
 
 - ❗️ The most important reason I forked it was I have found how to improve its __speed up to 5x__ times!
-- My repo supports complex emojis of combination `{basic_emoji}{skin_color}?{gender}?`
+- ✅ This tool supports complex emoji sequences of types `{basic_emoji}{skin_color}?{gender}?` and `{gender}{skin_kolor}?{basic_emoji}`
 - It supports of bugged VK.COM web-version emojis, where ending char `\uFE0F` is absent
 
 And of course, extend useful methods.  
@@ -192,7 +192,7 @@ You can search a string of mixed emoji/non-emoji characters and have all of the 
 
 ## Credits
 
-**iris-emoji-java** is based on [github/vdurmont/emoji-java](https://github.com/vdurmont/emoji-java).
+**[iris-emoji-java](https://github.com/iris2iris/iris-emoji-java)** is based on [github/vdurmont/emoji-java](https://github.com/vdurmont/emoji-java).
 
 And in its turn **emoji-java** originally used the data provided by the [github/gemoji project](https://github.com/github/gemoji). It is still based on it but has evolved since.
 

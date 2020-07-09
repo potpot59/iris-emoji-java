@@ -1,10 +1,18 @@
 # Changelog
 
+## v6.1i
+- Added support of complex emoji sequences of type **`{gender}{skin_kolor}?{basic_emoji}`**
+- Due to it `emojis.json` boolean parameter `supports_fitzpatrick` was changed to `sequence_type`.<br>
+1 — for supporting `{basic_emoji}{skin_color}?{gender}?`<br>
+2 — for supporting `{gender}{skin_kolor}?{basic_emoji}` (but there are only 3 emojis of such type: person, man and woman)
+- Emojis list was updated to Emoji Version 13.0.
+<br>**+150 emojis**, not counting combinations of skin color, hair color or gender 
+
 ## v6.0i
 
 - Ivan Ivanov forked main repository
 - Added class `Gender`
-- Added understanding of complex emojies: `{basic_emoji}{skin_color}?{gender}?`
+- Added support of complex emoji sequences of type `{basic_emoji}{skin_color}?{gender}?`
 - Added support of bugged VK.COM web-version emojis, where ending char `\uFE0F` is absent
 - `EmojiParser.UnicodeCandidate` renamed to `EmojiParser.EmojiResult`. And added new fields
 - `EmojiParser` algorithm improvement. `getEmojiEndPos` is replaced with `getNextEmoji`<br>

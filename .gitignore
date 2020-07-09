@@ -1,7 +1,9 @@
 # Java
 target
 out
+/src/main/java/META-INF/
 
 # IntelliJ files
 *.iml
 .idea
+.gitignore

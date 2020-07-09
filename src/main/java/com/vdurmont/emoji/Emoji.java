@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * This classrerуауаefefeere represents an emoji.<br>
+ * This class represents an emoji.<br>
  * <br>
  * This object is immutable so it can be used safely in a multithreaded context.
  *
@@ -14,30 +14,35 @@ import java.util.List;
 public class Emoji {
 	public final String description;
 	public final boolean supportsFitzpatrick;
+	public final int sequenceType;
 	public final List<String> aliases;
 	public final List<String> tags;
 	public final String unicode;
 	public final String htmlDec;
 	public final String htmlHex;
 
+	public static final int SEQUENCE_BASE_SKIN_GENDER = 1;
+	public static final int SEQUENCE_GENDER_SKIN_BASE = 2;
+
 	/**
 	 * Constructor for the Emoji.
 	 *
-	 * @param description         The description of the emoji
-	 * @param supportsFitzpatrick Whether the emoji supports Fitzpatrick modifiers
-	 * @param aliases             the aliases for this emoji
-	 * @param tags                the tags associated with this emoji
-	 * @param bytes               the bytes that represent the emoji
+	 * @param description		The description of the emoji
+	 * @param sequenceType		Whether the emoji supports Fitzpatrick modifiers
+	 * @param aliases			the aliases for this emoji
+	 * @param tags				the tags associated with this emoji
+	 * @param bytes				the bytes that represent the emoji
 	 */
 	protected Emoji(
 			String description,
-			boolean supportsFitzpatrick,
+			int sequenceType,
 			List<String> aliases,
 			List<String> tags,
 			byte... bytes
 	) {
 		this.description = description;
-		this.supportsFitzpatrick = supportsFitzpatrick;
+		this.sequenceType = sequenceType;
+		this.supportsFitzpatrick = sequenceType != 0;
 		this.aliases = aliases;
 		this.tags = tags;
 

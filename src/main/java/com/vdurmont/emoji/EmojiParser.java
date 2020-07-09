@@ -363,7 +363,7 @@ public class EmojiParser {
 	public static String parseFromUnicode(String input, EmojiTransformer transformer) {
 		int prev = 0;
 		StringBuilder sb = new StringBuilder(input.length());
-		List<EmojiResult> replacements = getEmojies(input);
+		List<EmojiResult> replacements = getEmojis(input);
 		for (EmojiResult candidate : replacements) {
 			sb.append(input, prev, candidate.startIndex);
 
@@ -388,11 +388,11 @@ public class EmojiParser {
 	}
 
 	public static List<EmojiResult> extractEmojis(String input) {
-		return getEmojies(input, 0);
+		return getEmojis(input, 0);
 	}
 
 	public static List<EmojiResult> extractEmojis(String input, int limit) {
-		return getEmojies(input, limit);
+		return getEmojis(input, limit);
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class EmojiParser {
 	 * @param input String to find all unicode emojis in
 	 * @return List of UnicodeCandidates for each unicode emote in text
 	 */
-	public static List<EmojiResult> getEmojies(String input, int limit) {
+	public static List<EmojiResult> getEmojis(String input, int limit) {
 		char[] inputCharArray = input.toCharArray();
 		List<EmojiResult> candidates = new ArrayList<>();
 		EmojiResult next;
@@ -422,8 +422,8 @@ public class EmojiParser {
 		return candidates;
 	}
 
-	public static List<EmojiResult> getEmojies(String input) {
-		return getEmojies(input, 0);
+	public static List<EmojiResult> getEmojis(String input) {
+		return getEmojis(input, 0);
 	}
 
 	/**
@@ -435,6 +435,9 @@ public class EmojiParser {
 	 */
 	public static EmojiResult getNextEmoji(char[] chars, int start) {
 		for (int i = start; i < chars.length; i++) {
+			/*var ch = chars[i];
+			if (Character.isAlphabetic(ch))
+				continue;*/
 			var emoji = getEmojiInPosition(chars, i);
 			if (emoji != null)
 				return emoji;
@@ -451,15 +454,34 @@ public class EmojiParser {
 		Fitzpatrick fitzpatrick = null;
 		Gender gender = null;
 		var endPos = start + emoji.unicode.length();
-		if (emoji.supportsFitzpatrick) {
+		var sequenceType = emoji.sequenceType;
+		if (sequenceType == Emoji.SEQUENCE_BASE_SKIN_GENDER) {
 			fitzpatrick = Fitzpatrick.find(chars, endPos);
 			if (fitzpatrick != null) {
 				endPos += 2;
 			}
 			GenderMatch gg = findGender(chars, endPos);
 			if (gg != null) {
-				endPos = gg.endPos + 1;
+				endPos = gg.endPos;
 				gender = gg.gender;
+			}
+		} else if (sequenceType == Emoji.SEQUENCE_GENDER_SKIN_BASE) {
+
+			Gender gg = findGender2(emoji.unicode);
+			if (gg != null) {
+				//endPos += emoji.unicode.length();
+				gender = gg;
+			}
+
+			fitzpatrick = Fitzpatrick.find(chars, endPos);
+			if (fitzpatrick != null) {
+				endPos += 2;
+			}
+
+			var baseEmoji = tryGetBestBaseEmoji(chars, endPos);
+			if (baseEmoji != null) {
+				endPos += baseEmoji.unicode.length() + 1; // +1 because \u200D
+				emoji = baseEmoji;
 			}
 		}
 
@@ -469,6 +491,16 @@ public class EmojiParser {
 				endPos++;
 		}
 		return new EmojiResult(emoji, fitzpatrick, gender, chars, start, endPos);
+	}
+
+	private static Emoji tryGetBestBaseEmoji(char[] chars, int startPos) {
+		var len = chars.length;
+		if (startPos >= len)
+			return null;
+		if (chars[startPos] != '\u200D')
+			return null;
+		startPos++;
+		return getBestBaseEmoji(chars, startPos);
 	}
 
 	private static GenderMatch findGender(char[] chars, int startPos) {
@@ -483,7 +515,11 @@ public class EmojiParser {
 		var gender = Gender.find(chars, pos);
 		if (gender == null)
 			return null;
-		return new GenderMatch(gender, pos);
+		return new GenderMatch(gender, pos + 1);
+	}
+
+	private static Gender findGender2(String emoji) {
+		return Gender.find2(emoji);
 	}
 
 	private static class GenderMatch {
@@ -627,10 +663,41 @@ public class EmojiParser {
 	}
 
 	public static void main(String[] args) {
-		/*var text = "\uD83D\uDC68\u200D\uD83D\uDCBB\uD83E\uDDB9\uD83C\uDFFE\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83D\uDD2C\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC70\uD83C\uDFFE\uD83E\uDDDB\uD83C\uDFFD\u200D♂️\uD83E\uDD31\uD83C\uDFFF\uD83D\uDC68\uD83C\uDFFC\u200D\uD83C\uDFEB\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF73\uD83D\uDC73\uD83C\uDFFB\u200D♂️";
-		var items = EmojiParser.extractEmojiStrings(text);
+		//val text = "ergerge\uD83D\uDC68\u200D\uD83C\uDFEB\uD83D\uDC69\u200D⚖\uD83D\uDC69\u200D✈\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83D\uDD27\uD83D\uDC68\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC76\uD83D\uDC69\u200D❤\u200D\uD83D\uDC69\uD83D\uDC76\uD83D\uDC67\uD83D\uDE4D\u200D♀\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDD0A\uD83D\uDCE3\uD83D\uDCE3\uD83E\uDDB9\u200D♂\uD83E\uDDB9\u200D♂\uD83E\uDDDE\u200D♂\uD83E\uDDDE\u200D♀\uD83E\uDDB9\u200D♂\uD83E\uDDDC\u200D♂\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDD75\u200D♂\uD83E\uDD35\uD83E\uDD30\uD83E\uDD30\uD83D\uDC9F\uD83D\uDC9F\uD83D\uDC9B\uD83D\uDC99\uD83D\uDDA4\uD83E\uDD9A\uD83E\uDD95\uD83D\uDC32\uD83E\uDD8E\uD83E\uDD8E\uD83C\uDF1C⛈\uD83C\uDF20⛅⛅\uD83C\uDF02\uD83C\uDF25\uD83D\uDC75\uD83D\uDC75\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC69\u200D\uD83E\uDDB2\uD83E\uDD2A\uD83D\uDE19\uD83D\uDE18\uD83D\uDE1A\uD83D\uDC74\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC68\u200D\uD83E\uDDB3\uD83D\uDC68\u200D\uD83C\uDFED\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC68\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83C\uDFA4\uD83D\uDC6E\u200D♂\uD83D\uDD75\u200D♂\uD83D\uDD75\u200D♀\uD83D\uDC82\u200D♂\uD83D\uDC82\u200D♀\uD83D\uDC77\u200D♂\uD83D\uDC77\u200D♂\uD83D\uDC73\u200D♂\uD83D\uDC78"
+		//var text = "                                                                                                                                                                                                                          "
+				/*"ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "*/
+
+				/*+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "
+				+ "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  "*/
+		//		;
+		//testNew(text);
+		/*var text = "ergerge\uD83D\uDC68\u200D\uD83C\uDFEB\uD83D\uDC69\u200D⚖\uD83D\uDC69\u200D✈\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83D\uDD27\uD83D\uDC68\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC76\uD83D\uDC69\u200D❤\u200D\uD83D\uDC69\uD83D\uDC76\uD83D\uDC67\uD83D\uDE4D\u200D♀\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDD0A\uD83D\uDCE3\uD83D\uDCE3\uD83E\uDDB9\u200D♂\uD83E\uDDB9\u200D♂\uD83E\uDDDE\u200D♂\uD83E\uDDDE\u200D♀\uD83E\uDDB9\u200D♂\uD83E\uDDDC\u200D♂\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDD75\u200D♂\uD83E\uDD35\uD83E\uDD30\uD83E\uDD30\uD83D\uDC9F\uD83D\uDC9F\uD83D\uDC9B\uD83D\uDC99\uD83D\uDDA4\uD83E\uDD9A\uD83E\uDD95\uD83D\uDC32\uD83E\uDD8E\uD83E\uDD8E\uD83C\uDF1C⛈\uD83C\uDF20⛅⛅\uD83C\uDF02\uD83C\uDF25\uD83D\uDC75\uD83D\uDC75\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC69\u200D\uD83E\uDDB2\uD83E\uDD2A\uD83D\uDE19\uD83D\uDE18\uD83D\uDE1A\uD83D\uDC74\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC68\u200D\uD83E\uDDB3\uD83D\uDC68\u200D\uD83C\uDFED\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC68\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83C\uDFA4\uD83D\uDC6E\u200D♂\uD83D\uDD75\u200D♂\uD83D\uDD75\u200D♀\uD83D\uDC82\u200D♂\uD83D\uDC82\u200D♀\uD83D\uDC77\u200D♂\uD83D\uDC77\u200D♂\uD83D\uDC73\u200D♂\uD83D\uDC78"
+				+ "ergerge\uD83D\uDC68\u200D\uD83C\uDFEB\uD83D\uDC69\u200D⚖\uD83D\uDC69\u200D✈\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83D\uDD27\uD83D\uDC68\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC76\uD83D\uDC69\u200D❤\u200D\uD83D\uDC69\uD83D\uDC76\uD83D\uDC67\uD83D\uDE4D\u200D♀\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDC41\u200D\uD83D\uDDE8\uD83D\uDD0A\uD83D\uDCE3\uD83D\uDCE3\uD83E\uDDB9\u200D♂\uD83E\uDDB9\u200D♂\uD83E\uDDDE\u200D♂\uD83E\uDDDE\u200D♀\uD83E\uDDB9\u200D♂\uD83E\uDDDC\u200D♂\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDC69\u200D\uD83C\uDF93\uD83D\uDD75\u200D♂\uD83E\uDD35\uD83E\uDD30\uD83E\uDD30\uD83D\uDC9F\uD83D\uDC9F\uD83D\uDC9B\uD83D\uDC99\uD83D\uDDA4\uD83E\uDD9A\uD83E\uDD95\uD83D\uDC32\uD83E\uDD8E\uD83E\uDD8E\uD83C\uDF1C⛈\uD83C\uDF20⛅⛅\uD83C\uDF02\uD83C\uDF25\uD83D\uDC75\uD83D\uDC75\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC69\u200D\uD83E\uDDB2\uD83E\uDD2A\uD83D\uDE19\uD83D\uDE18\uD83D\uDE1A\uD83D\uDC74\uD83D\uDC69\u200D\uD83E\uDDB2\uD83D\uDC68\u200D\uD83E\uDDB3\uD83D\uDC68\u200D\uD83C\uDFED\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC68\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFEB\uD83D\uDC69\u200D\uD83D\uDCBC\uD83D\uDC69\u200D\uD83C\uDFA8\uD83D\uDC68\u200D\uD83C\uDFA4\uD83D\uDC6E\u200D♂\uD83D\uDD75\u200D♂\uD83D\uDD75\u200D♀\uD83D\uDC82\u200D♂\uD83D\uDC82\u200D♀\uD83D\uDC77\u200D♂\uD83D\uDC77\u200D♂\uD83D\uDC73\u200D♂\uD83D\uDC78";*/
+		//var text = "ук пуп уп у у пупыуп уы\uD83D\uDC73\u200D♀️пыу пыу\uD83D\uDC73\u200D♂️п кыуп уы пу у\uD83D\uDE0Bп \uD83E\uDD2Fуы\uD83E\uDD71пыукп купы ук ыу пыукп \uD83D\uDE2Cуп укп ук пукы пуы п\uD83D\uDE35укп ыук пуык пу пу\uD83D\uDE37ып уы пуы пуы пуы\uD83D\uDE38 у\uD83D\uDE3Eкп ыуп у пкуы пуы пыу\uD83E\uDD1E\uD83C\uDFFD \uD83D\uDC48уыпуып уып упк ыукп ук\uD83D\uDC7Fп \uD83D\uDC67\uD83C\uDFFCук пу уп \uD83D\uDC71\uD83C\uDFFE\u200D♂️уп уы укп уыкп у\uD83D\uDC74\uD83C\uDFFCп уыкп упу уы \uD83E\uDDD1\uD83C\uDFFD\u200D⚕️пу кпуы ук \uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4уы \uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF93ку пукп ыу уп ук \uD83D\uDC6E\u200D♀️ыу пуы уы пуы \uD83D\uDC6E\u200D♀️п уы\uD83D\uDC68\uD83C\uDFFC\u200D\uD83E\uDDB3пуы ппыу уы ыу \uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDDB2уп пу укп  ";
+		//testNew(text);
+		/*var items = EmojiParser.extractEmojiStrings(text);
 		System.out.println(items);*/
-		var res = EmojiManager.isEmoji("\uD83E\uDDDB\uD83C\uDFFD\u200D♂️ ");
-		System.out.println(res);
+
+
+		var text = "\uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDFA8\uD83D\uDC69\uD83C\uDFFB\u200D\uD83D\uDE92\uD83E\uDD34\uD83C\uDFFB\uD83D\uDC68\uD83C\uDFFB\u200D⚖\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83D\uDCBB\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83D\uDCBC\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDFA4\uD83D\uDC69\uD83C\uDFFB\u200D\uD83C\uDFED\uD83D\uDC68\uD83C\uDFFB\u200D\uD83C\uDF73\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83C\uDF3E\uD83D\uDC82\uD83C\uDFFB\u200D♂\uD83D\uDC82\uD83C\uDFFB\uD83D\uDC82\uD83C\uDFFB\u200D♀\uD83D\uDD75\uD83C\uDFFB\uD83D\uDC77\uD83C\uDFFB\u200D♂\uD83D\uDC77\uD83C\uDFFB\uD83D\uDC6E\uD83C\uDFFB\u200D♂\uD83E\uDDD5\uD83C\uDFFB\uD83E\uDDD5\uD83C\uDFFB\uD83D\uDC68\uD83C\uDFFF\u200D\uD83E\uDDB3\uD83D\uDC69\uD83C\uDFFB\u200D\uD83E\uDDB0";
+
+		System.out.println(EmojiParser.extractEmojiStrings(text));
+
+	}
+
+	private static void testNew(String text) {
+		for (int i = 0; i < 1000; i++)
+			EmojiParser.extractEmojis(text);
+		var start = System.currentTimeMillis();
+		for (int i = 0; i < 1_000_000; i++)
+			EmojiParser.extractEmojis(text);
+		var end = System.currentTimeMillis();
+		System.out.println("Diff = " + (end - start));
 	}
 }
