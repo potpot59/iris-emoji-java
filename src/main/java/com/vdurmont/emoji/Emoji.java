@@ -1,6 +1,5 @@
 package com.vdurmont.emoji;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -20,6 +19,7 @@ public class Emoji {
 	public final String unicode;
 	public final String htmlDec;
 	public final String htmlHex;
+	public final String emojiChar;
 
 	public static final int SEQUENCE_BASE_SKIN_GENDER = 1;
 	public static final int SEQUENCE_GENDER_SKIN_BASE = 2;
@@ -31,14 +31,15 @@ public class Emoji {
 	 * @param sequenceType		Whether the emoji supports Fitzpatrick modifiers
 	 * @param aliases			the aliases for this emoji
 	 * @param tags				the tags associated with this emoji
-	 * @param bytes				the bytes that represent the emoji
+	 * @param unicode				the bytes that represent the emoji
 	 */
 	protected Emoji(
 			String description,
 			int sequenceType,
 			List<String> aliases,
 			List<String> tags,
-			byte... bytes
+			String unicode,
+			String emojiChar
 	) {
 		this.description = description;
 		this.sequenceType = sequenceType;
@@ -47,7 +48,8 @@ public class Emoji {
 		this.tags = tags;
 
 		int count = 0;
-		unicode = new String(bytes, StandardCharsets.UTF_8);
+		this.unicode = unicode;
+		this.emojiChar = emojiChar;
 		int stringLength = unicode.length();
 		String[] pointCodes = new String[stringLength];
 		String[] pointCodesHex = new String[stringLength];
@@ -121,6 +123,8 @@ public class Emoji {
 	public String getUnicode() {
 		return this.unicode;
 	}
+
+	public String getEmojiChar() {return this.emojiChar; }
 
 	/**
 	 * Returns the unicode representation of the emoji associated with the

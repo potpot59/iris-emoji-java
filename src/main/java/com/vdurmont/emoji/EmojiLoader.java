@@ -64,11 +64,12 @@ public class EmojiLoader {
 			return null;
 		}
 		var unicode = json.getString("emoji");
+
 		// Lifehach to filter out old emojis map from wrong gender_base records
 		if (unicode.startsWith("\uD83D\uDC69\u200D") || unicode.startsWith("\uD83D\uDC68\u200D"))
 			return null;
-
-		byte[] bytes = unicode.getBytes(StandardCharsets.UTF_8);
+		var emojiChar = json.getString("emojiChar");
+		//byte[] bytes = unicode.getBytes(StandardCharsets.UTF_8);
 
 		String description = null;
 		if (json.has("description")) {
@@ -80,7 +81,7 @@ public class EmojiLoader {
 		}
 		List<String> aliases = jsonArrayToStringList(json.getJSONArray("aliases"));
 		List<String> tags = jsonArrayToStringList(json.getJSONArray("tags"));
-		return new Emoji(description, sequenceType, aliases, tags, bytes);
+		return new Emoji(description, sequenceType, aliases, tags, unicode, !unicode.equals(emojiChar)? emojiChar : unicode);
 	}
 
 	private static List<String> jsonArrayToStringList(JSONArray array) {
