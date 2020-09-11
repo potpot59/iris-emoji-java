@@ -2377,6 +2377,18 @@
     ]
   },
   {
+    "emojiChar": "🏳️‍🌈",
+    "emoji": "\uD83C\uDFF3\u200D\uD83C\uDF08",
+    "description": "rainbow flag no space",
+    "aliases": [
+      "rainbow_flag",
+      "pride_flag"
+    ],
+    "tags": [
+      "flag"
+    ]
+  },
+  {
     "emojiChar": "🇷🇪",
     "emoji": "\uD83C\uDDF7\uD83C\uDDEA",
     "description": "regional indicator symbol letter r + regional indicator symbol letter e",
