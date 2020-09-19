@@ -2366,18 +2366,6 @@
   },
   {
     "emojiChar": "🏳️‍🌈",
-    "emoji": "\uD83C\uDFF3 \u200D\uD83C\uDF08",
-    "description": "rainbow flag space",
-    "aliases": [
-      "rainbow_flag",
-      "pride_flag"
-    ],
-    "tags": [
-      "flag"
-    ]
-  },
-  {
-    "emojiChar": "🏳️‍🌈",
     "emoji": "\uD83C\uDFF3\u200D\uD83C\uDF08",
     "description": "rainbow flag no space",
     "aliases": [
