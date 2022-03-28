@@ -4,7 +4,7 @@
 
 	<groupId>com.vdurmont-iris</groupId>
 	<artifactId>emoji-java</artifactId>
-	<version>6.5</version>
+	<version>6.6</version>
 	<packaging>jar</packaging>
 
 	<name>emoji-java</name>
