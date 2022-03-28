@@ -59,6 +59,14 @@ public class EmojiParser {
 									unicodeCandidate.getFitzpatrickType() +
 									":";
 						}
+					case PARSE_AND_ADD_SPACE:
+						if (unicodeCandidate.hasFitzpatrick()) {
+							return " :" +
+									unicodeCandidate.getEmoji().getAliases().get(0) +
+									"|" +
+									unicodeCandidate.getFitzpatrickType() +
+									": ";
+						}
 					case REMOVE:
 						return ":" +
 								unicodeCandidate.getEmoji().getAliases().get(0) +
@@ -646,6 +654,11 @@ public class EmojiParser {
 		 * Tries to match the Fitzpatrick modifier with the previous emoji
 		 */
 		PARSE,
+
+		/**
+		 * Tries to match the Fitzpatrick modifier with the previous emoji
+		 */
+		PARSE_AND_ADD_SPACE,
 
 		/**
 		 * Removes the Fitzpatrick modifier from the string

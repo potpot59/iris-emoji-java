@@ -4,7 +4,7 @@
 
     <groupId>com.vdurmont-iris</groupId>
     <artifactId>emoji-java</artifactId>
-    <version>6.2</version>
+    <version>6.3</version>
     <packaging>jar</packaging>
 
     <name>emoji-java</name>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20170516</version>
+            <version>20220320</version>
         </dependency>
 
         <dependency>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
